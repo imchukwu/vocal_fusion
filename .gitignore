@@ -1,0 +1,24 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary, generated with `go test -c`
+*.test
+
+# Output of the go build command
+*.o
+
+# Environment variables
+.env
+
+# Dependency directories (e.g., vendor)
+vendor/
+
+# IDE-specific files (e.g., VS Code)
+.vscode/
+
+# Build artifacts and temporary files
+tmp/
+log/
