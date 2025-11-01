@@ -20,16 +20,20 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		w.Write([]byte("🎤 Welcome to Vocal Fusion API"))
 	})
 
-	r.Route("/api/users", func(api chi.Router) {
+	r.Route("/users", func(api chi.Router) {
 		api.Post("/register", userHandler.RegisterUser)
 		api.Post("/login", userHandler.Login)
+		api.Get("/", userHandler.GetAllUsers)
+		api.Get("/{id}", userHandler.GetUserByID)
+		api.Put("/{id}", userHandler.UpdateUser)
+		api.Delete("/{id}", userHandler.DeleteUser)
 	})
 
 	// ===== Events =====
 	eventRepo := repository.NewEventRepository(db)
 	eventHandler := handlers.NewEventHandler(eventRepo)
 
-	r.Route("/api/events", func(api chi.Router) {
+	r.Route("/events", func(api chi.Router) {
 		api.Post("/", eventHandler.CreateEvent)
 		api.Get("/", eventHandler.GetEvents)
 		api.Get("/{id}", eventHandler.GetEventByID)
@@ -37,12 +41,11 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		api.Delete("/{id}", eventHandler.DeleteEvent)
 	})
 
-
 	// ===== FAQs =====
 	faqRepo := repository.NewFAQRepository(db)
 	faqHandler := handlers.NewFAQHandler(faqRepo)
 
-	r.Route("/api/faqs", func(api chi.Router) {
+	r.Route("/faqs", func(api chi.Router) {
 		api.Post("/", faqHandler.CreateFAQ)
 		api.Get("/", faqHandler.GetAllFAQs)
 		api.Get("/{id}", faqHandler.GetFAQByID)
@@ -50,12 +53,11 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		api.Delete("/{id}", faqHandler.DeleteFAQ)
 	})
 
-
 	// ===== Media =====
 	mediaRepo := repository.NewMediaRepository(db)
 	mediaHandler := handlers.NewMediaHandler(mediaRepo)
 
-	r.Route("/api/media", func(api chi.Router) {
+	r.Route("/media", func(api chi.Router) {
 		api.Post("/", mediaHandler.CreateMedia)
 		api.Get("/", mediaHandler.GetAllMedia)
 		api.Get("/{id}", mediaHandler.GetMediaByID)
@@ -66,7 +68,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 	messageRepo := repository.NewMessageRepository(db)
 	messageHandler := handlers.NewMessageHandler(messageRepo)
 
-	r.Route("/api/messages", func(api chi.Router) {
+	r.Route("/messages", func(api chi.Router) {
 		api.Post("/", messageHandler.CreateMessage)
 		api.Get("/", messageHandler.GetAllMessages)
 		api.Get("/{id}", messageHandler.GetMessageByID)
@@ -77,7 +79,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 	schoolRepo := repository.NewSchoolRepository(db)
 	schoolHandler := handlers.NewSchoolHandler(schoolRepo)
 
-	r.Route("/api/schools", func(api chi.Router) {
+	r.Route("/schools", func(api chi.Router) {
 		api.Post("/", schoolHandler.CreateSchool)
 		api.Get("/", schoolHandler.GetAllSchools)
 		api.Get("/{id}", schoolHandler.GetSchoolByID)
@@ -89,16 +91,11 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 	winnerRepo := repository.NewWinnerSaysRepository(db)
 	winnerHandler := handlers.NewWinnerSaysHandler(winnerRepo)
 
-	r.Route("/api/winnersays", func(r chi.Router) {
+	r.Route("/winnersays", func(r chi.Router) {
 		r.Post("/", winnerHandler.CreateWinnerSays)
 		r.Get("/", winnerHandler.GetAllWinnerSays)
 		r.Get("/{id}", winnerHandler.GetWinnerSaysByID)
 		r.Delete("/{id}", winnerHandler.DeleteWinnerSays)
 	})
 
-
-
-
 }
-
-

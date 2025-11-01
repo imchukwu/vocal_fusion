@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type MediaHandler struct {
@@ -19,7 +20,7 @@ func NewMediaHandler(repo repository.MediaRepository) *MediaHandler {
 	return &MediaHandler{Repo: repo}
 }
 
-// CreateMedia handles POST /api/media
+// CreateMedia handles POST /media
 func (h *MediaHandler) CreateMedia(w http.ResponseWriter, r *http.Request) {
 	var media models.Media
 	if err := json.NewDecoder(r.Body).Decode(&media); err != nil {
@@ -46,7 +47,7 @@ func (h *MediaHandler) CreateMedia(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(media)
 }
 
-// GetAllMedia handles GET /api/media
+// GetAllMedia handles GET /media
 func (h *MediaHandler) GetAllMedia(w http.ResponseWriter, r *http.Request) {
 	mediaList, err := h.Repo.GetAllMedia()
 	if err != nil {
@@ -56,7 +57,7 @@ func (h *MediaHandler) GetAllMedia(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(mediaList)
 }
 
-// GetMediaByID handles GET /api/media/{id}
+// GetMediaByID handles GET /media/{id}
 func (h *MediaHandler) GetMediaByID(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	media, err := h.Repo.GetMediaByID(id)
@@ -67,7 +68,7 @@ func (h *MediaHandler) GetMediaByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(media)
 }
 
-// UpdateMedia handles PUT /api/media/{id}
+// UpdateMedia handles PUT /media/{id}
 func (h *MediaHandler) UpdateMedia(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	var media models.Media
@@ -85,7 +86,7 @@ func (h *MediaHandler) UpdateMedia(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(media)
 }
 
-// DeleteMedia handles DELETE /api/media/{id}
+// DeleteMedia handles DELETE /media/{id}
 func (h *MediaHandler) DeleteMedia(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	if err := h.Repo.DeleteMedia(id); err != nil {

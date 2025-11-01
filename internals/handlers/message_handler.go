@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type MessageHandler struct {
@@ -19,7 +20,7 @@ func NewMessageHandler(repo repository.MessageRepository) *MessageHandler {
 	return &MessageHandler{Repo: repo}
 }
 
-// CreateMessage handles POST /api/messages
+// CreateMessage handles POST /messages
 func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	var msg models.Message
 	if err := json.NewDecoder(r.Body).Decode(&msg); err != nil {
@@ -45,7 +46,7 @@ func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetAllMessages handles GET /api/messages
+// GetAllMessages handles GET /messages
 func (h *MessageHandler) GetAllMessages(w http.ResponseWriter, r *http.Request) {
 	messages, err := h.Repo.GetAllMessages()
 	if err != nil {
@@ -55,7 +56,7 @@ func (h *MessageHandler) GetAllMessages(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(messages)
 }
 
-// GetMessageByID handles GET /api/messages/{id}
+// GetMessageByID handles GET /messages/{id}
 func (h *MessageHandler) GetMessageByID(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	msg, err := h.Repo.GetMessageByID(id)
@@ -66,7 +67,7 @@ func (h *MessageHandler) GetMessageByID(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(msg)
 }
 
-// UpdateMessageStatus handles PATCH /api/messages/{id}/status
+// UpdateMessageStatus handles PATCH /messages/{id}/status
 func (h *MessageHandler) UpdateMessageStatus(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 
@@ -93,7 +94,7 @@ func (h *MessageHandler) UpdateMessageStatus(w http.ResponseWriter, r *http.Requ
 	})
 }
 
-// DeleteMessage handles DELETE /api/messages/{id}
+// DeleteMessage handles DELETE /messages/{id}
 func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	if err := h.Repo.DeleteMessage(id); err != nil {

@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type SchoolHandler struct {
@@ -18,7 +19,7 @@ func NewSchoolHandler(repo repository.SchoolRepository) *SchoolHandler {
 	return &SchoolHandler{Repo: repo}
 }
 
-// CreateSchool handles POST /api/schools
+// CreateSchool handles POST /schools
 func (h *SchoolHandler) CreateSchool(w http.ResponseWriter, r *http.Request) {
 	var school models.School
 	if err := json.NewDecoder(r.Body).Decode(&school); err != nil {
@@ -42,7 +43,7 @@ func (h *SchoolHandler) CreateSchool(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetAllSchools handles GET /api/schools
+// GetAllSchools handles GET /schools
 func (h *SchoolHandler) GetAllSchools(w http.ResponseWriter, r *http.Request) {
 	schools, err := h.Repo.GetAllSchools()
 	if err != nil {
@@ -52,7 +53,7 @@ func (h *SchoolHandler) GetAllSchools(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(schools)
 }
 
-// GetSchoolByID handles GET /api/schools/{id}
+// GetSchoolByID handles GET /schools/{id}
 func (h *SchoolHandler) GetSchoolByID(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	school, err := h.Repo.GetSchoolByID(id)
@@ -63,7 +64,7 @@ func (h *SchoolHandler) GetSchoolByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(school)
 }
 
-// UpdateSchool handles PUT /api/schools/{id}
+// UpdateSchool handles PUT /schools/{id}
 func (h *SchoolHandler) UpdateSchool(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	var updated models.School
@@ -99,7 +100,7 @@ func (h *SchoolHandler) UpdateSchool(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// DeleteSchool handles DELETE /api/schools/{id}
+// DeleteSchool handles DELETE /schools/{id}
 func (h *SchoolHandler) DeleteSchool(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 	if err := h.Repo.DeleteSchool(id); err != nil {
