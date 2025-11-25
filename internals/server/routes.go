@@ -87,6 +87,17 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		api.Delete("/{id}", schoolHandler.DeleteSchool)
 	})
 
+	// ===== School–Event Registration =====
+	schoolEventRepo := repository.NewSchoolEventRepository(db)
+	schoolEventHandler := handlers.NewSchoolEventHandler(schoolEventRepo)
+
+	r.Route("/registrations", func(api chi.Router) {
+		api.Post("/events/{eventID}", schoolEventHandler.RegisterSchool)
+		api.Get("/events/{eventID}", schoolEventHandler.GetEventRegistrations)
+		api.Get("/schools/{schoolID}", schoolEventHandler.GetSchoolRegistrations)
+		api.Delete("/events/{eventID}/schools/{schoolID}", schoolEventHandler.UnregisterSchool)
+	})
+
 	// WinnerSays routes
 	winnerRepo := repository.NewWinnerSaysRepository(db)
 	winnerHandler := handlers.NewWinnerSaysHandler(winnerRepo)

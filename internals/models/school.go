@@ -12,10 +12,13 @@ type School struct {
     City             string    `json:"city"`
     PrincipalName    string    `json:"principal_name"`
     CoordinationName string    `json:"coordination_name"`
-    PaymentStatus    string    `json:"payment_status"`   // e.g., "Pending", "Paid", "Canceled"
-    // Assuming MediaList is a comma-separated string or a JSON array string in the DB
+    PaymentStatus    string    `json:"payment_status"`
     MediaList        string    `json:"media_list"`
-    ConfirmStatus    string    `json:"confirm_status"`   // e.g., "Confirmed", "Pending"
-    CreatedAt        time.Time `json:"created_at" gorm:"autoCreateTime"`
-    UpdatedAt        time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+    ConfirmStatus    string    `json:"confirm_status"`
+
+    // Many-to-Many Pivot Relationship
+    Events []Event `json:"events" gorm:"many2many:school_events;"`
+
+    CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+    UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }

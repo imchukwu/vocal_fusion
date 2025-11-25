@@ -29,6 +29,7 @@ func main() {
 		&models.User{},
 		&models.School{},
 		&models.Event{},
+		&models.SchoolEvent{},
 		&models.Message{},
 		&models.FAQ{},
 		&models.Media{},
