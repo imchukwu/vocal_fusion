@@ -87,7 +87,6 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		api.Delete("/{id}", schoolHandler.DeleteSchool)
 	})
 
-	// ===== School–Event Registration =====
 	schoolEventRepo := repository.NewSchoolEventRepository(db)
 	schoolEventHandler := handlers.NewSchoolEventHandler(schoolEventRepo)
 
