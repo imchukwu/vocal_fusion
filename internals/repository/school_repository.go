@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"vocal_fusion/internals/models"
+
+	"gorm.io/gorm"
 )
 
 type SchoolRepository interface {
@@ -10,6 +11,7 @@ type SchoolRepository interface {
 	GetAllSchools() ([]models.School, error)
 	GetSchoolByID(id int) (*models.School, error)
 	UpdateSchool(school *models.School) error
+	UpdateConfirmationStatus(id int, status string) error
 	DeleteSchool(id int) error
 }
 
@@ -39,6 +41,10 @@ func (r *schoolRepository) GetSchoolByID(id int) (*models.School, error) {
 
 func (r *schoolRepository) UpdateSchool(school *models.School) error {
 	return r.DB.Save(school).Error
+}
+
+func (r *schoolRepository) UpdateConfirmationStatus(id int, status string) error {
+	return r.DB.Model(&models.School{}).Where("id = ?", id).Update("confirmationStatus", status).Error
 }
 
 func (r *schoolRepository) DeleteSchool(id int) error {

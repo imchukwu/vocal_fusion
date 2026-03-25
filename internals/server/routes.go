@@ -7,11 +7,14 @@ import (
 	"gorm.io/gorm"
 
 	"vocal_fusion/internals/handlers"
-	// "vocal_fusion/internals/middleware"
+	"vocal_fusion/internals/middleware"
 	"vocal_fusion/internals/repository"
 )
 
 func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
+	// Global Rate Limiting (5 requests per second, burst of 10)
+	rl := middleware.NewRateLimiter(5, 10)
+	r.Use(rl.Limit)
 
 	userRepo := repository.NewUserRepository(db)
 	userHandler := handlers.NewUserHandler(userRepo)
@@ -36,6 +39,8 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 	r.Route("/events", func(api chi.Router) {
 		api.Post("/", eventHandler.CreateEvent)
 		api.Get("/", eventHandler.GetEvents)
+		api.Get("/types", eventHandler.GetEventTypes) // ✅ Added event types route
+		api.Get("/count", eventHandler.GetEventCount) // ✅ Added count route
 		api.Get("/{id}", eventHandler.GetEventByID)
 		api.Put("/{id}", eventHandler.UpdateEvent)
 		api.Delete("/{id}", eventHandler.DeleteEvent)
@@ -83,7 +88,9 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		api.Post("/", schoolHandler.CreateSchool)
 		api.Get("/", schoolHandler.GetAllSchools)
 		api.Get("/{id}", schoolHandler.GetSchoolByID)
+
 		api.Put("/{id}", schoolHandler.UpdateSchool)
+		api.Patch("/{id}/confirm", schoolHandler.UpdateConfirmationStatus) // ✅ Added confirm route
 		api.Delete("/{id}", schoolHandler.DeleteSchool)
 	})
 
@@ -108,4 +115,9 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 		r.Delete("/{id}", winnerHandler.DeleteWinnerSays)
 	})
 
+	// ===== File Uploads =====
+	r.Post("/upload", handlers.UploadFile)
+
+	// Serve static files from the "uploads" directory
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 }

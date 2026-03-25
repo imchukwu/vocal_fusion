@@ -12,6 +12,7 @@ type EventRepository interface {
 	GetEventByID(id uint) (*models.Event, error)
 	UpdateEvent(event *models.Event) error
 	DeleteEvent(id uint) error
+	CountEvents() (int64, error)
 }
 
 type eventRepository struct {
@@ -45,4 +46,10 @@ func (r *eventRepository) UpdateEvent(event *models.Event) error {
 
 func (r *eventRepository) DeleteEvent(id uint) error {
 	return r.db.Delete(&models.Event{}, id).Error
+}
+
+func (r *eventRepository) CountEvents() (int64, error) {
+	var count int64
+	err := r.db.Model(&models.Event{}).Count(&count).Error
+	return count, err
 }

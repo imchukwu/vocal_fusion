@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type EventHandler struct {
@@ -80,6 +81,7 @@ func (h *EventHandler) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	event.Date = updatedEvent.Date
 	event.Time = updatedEvent.Time
 	event.Location = updatedEvent.Location
+	event.Description = updatedEvent.Description
 
 	if err := h.EventRepo.UpdateEvent(event); err != nil {
 		http.Error(w, "Failed to update event", http.StatusInternalServerError)
@@ -99,4 +101,30 @@ func (h *EventHandler) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// GetEventCount returns the total number of events
+func (h *EventHandler) GetEventCount(w http.ResponseWriter, r *http.Request) {
+	count, err := h.EventRepo.CountEvents()
+	if err != nil {
+		http.Error(w, "Failed to count events", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]int64{"count": count})
+}
+
+// GetEventTypes returns a list of predefined event types
+func (h *EventHandler) GetEventTypes(w http.ResponseWriter, r *http.Request) {
+	types := []string{
+		"Workshop",
+		"Seminar",
+		"Concert",
+		"Competition",
+		"Rehearsal",
+		"Meeting",
+		"Camp",
+		"Other",
+	}
+	json.NewEncoder(w).Encode(types)
 }

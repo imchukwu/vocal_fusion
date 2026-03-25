@@ -109,3 +109,30 @@ func (h *SchoolHandler) DeleteSchool(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// UpdateConfirmationStatus handles PATCH /schools/{id}/confirm
+func (h *SchoolHandler) UpdateConfirmationStatus(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+
+	var payload struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if payload.Status == "" {
+		http.Error(w, "Status is required", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Repo.UpdateConfirmationStatus(id, payload.Status); err != nil {
+		http.Error(w, "Failed to update confirmation status", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Confirmation status updated successfully",
+	})
+}
