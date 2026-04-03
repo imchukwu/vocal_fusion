@@ -9,8 +9,9 @@ type MessageRepository interface {
 	CreateMessage(msg *models.Message) error
 	GetAllMessages() ([]models.Message, error)
 	GetMessageByID(id int) (*models.Message, error)
-	UpdateMessageStatus(id int, status string) error
+	UpdateMessageStatus(id int, status models.MessageStatus) error
 	DeleteMessage(id int) error
+	HasReply(parentID int) (bool, error)
 }
 
 type messageRepository struct {
@@ -37,10 +38,16 @@ func (r *messageRepository) GetMessageByID(id int) (*models.Message, error) {
 	return &msg, err
 }
 
-func (r *messageRepository) UpdateMessageStatus(id int, status string) error {
+func (r *messageRepository) UpdateMessageStatus(id int, status models.MessageStatus) error {
 	return r.DB.Model(&models.Message{}).Where("id = ?", id).Update("status", status).Error
 }
 
 func (r *messageRepository) DeleteMessage(id int) error {
 	return r.DB.Delete(&models.Message{}, id).Error
+}
+
+func (r *messageRepository) HasReply(parentID int) (bool, error) {
+	var count int64
+	err := r.DB.Model(&models.Message{}).Where("reply_to_id = ?", parentID).Count(&count).Error
+	return count > 0, err
 }

@@ -2,16 +2,32 @@ package models
 
 import "time"
 
+type MessageStatus string
+
+const (
+	MessageStatusUnread  MessageStatus = "unread"
+	MessageStatusRead    MessageStatus = "read"
+	MessageStatusReplied MessageStatus = "replied"
+)
+
+func (s MessageStatus) IsValid() bool {
+	switch s {
+	case MessageStatusUnread, MessageStatusRead, MessageStatusReplied:
+		return true
+	}
+	return false
+}
+
 type Message struct {
-	ID         int    `json:"id" gorm:"primaryKey"`
-	SenderName string `json:"sender_name"`
-	Email      string `json:"email"`
-	Subject    string `json:"subject"`
-	SchoolName string `json:"school_name"`
-	Status     string `json:"status" gorm:"default:unread"`
-	Phone      string `json:"phone"`
-	Content    string `json:"content" gorm:"type:text"`
-	ReplyToID  *int   `json:"reply_to_id"` // Pointer to parent message ID
+	ID         int           `json:"id" gorm:"primaryKey"`
+	SenderName string        `json:"sender_name"`
+	Email      string        `json:"email"`
+	Subject    string        `json:"subject"`
+	SchoolName string        `json:"school_name"`
+	Status     MessageStatus `json:"status" gorm:"default:unread"`
+	Phone      string        `json:"phone"`
+	Content    string        `json:"content" gorm:"type:text"`
+	ReplyToID  *int          `json:"reply_to_id"` // Pointer to parent message ID
 
 	// GORM tags for relation
 	ParentMessage *Message `json:"parent_message" gorm:"foreignKey:ReplyToID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

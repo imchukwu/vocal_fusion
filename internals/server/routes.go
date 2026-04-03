@@ -9,9 +9,10 @@ import (
 	"vocal_fusion/internals/handlers"
 	"vocal_fusion/internals/middleware"
 	"vocal_fusion/internals/repository"
+	"vocal_fusion/pkg/email"
 )
 
-func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
+func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 	// Global Rate Limiting (5 requests per second, burst of 10)
 	rl := middleware.NewRateLimiter(5, 10)
 	r.Use(rl.Limit)
@@ -71,7 +72,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB) {
 	})
 
 	messageRepo := repository.NewMessageRepository(db)
-	messageHandler := handlers.NewMessageHandler(messageRepo)
+	messageHandler := handlers.NewMessageHandler(messageRepo, emailSvc)
 
 	r.Route("/messages", func(api chi.Router) {
 		api.Post("/", messageHandler.CreateMessage)

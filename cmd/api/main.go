@@ -13,6 +13,7 @@ import (
 	"vocal_fusion/config"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/server"
+	"vocal_fusion/pkg/email"
 )
 
 func main() {
@@ -23,6 +24,12 @@ func main() {
 
 	// Connect to DB
 	db := config.ConnectDB()
+
+	// Load Config
+	cfg := config.InitConfig()
+
+	// Initialize Services
+	emailSvc := email.NewEmailService(cfg)
 
 	// Run migrations
 	if err := db.AutoMigrate(
@@ -46,7 +53,7 @@ func main() {
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(corsMiddleware)
 
-    server.RegisterRoutes(r, db)
+    server.RegisterRoutes(r, db, emailSvc)
 
 	port := os.Getenv("PORT")
 	if port == "" {

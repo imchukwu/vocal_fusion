@@ -6,7 +6,12 @@ import (
 )
 
 type AppConfig struct {
-	DBUrl string
+	DBUrl    string
+	SMTPHost string
+	SMTPPort string
+	SMTPUser string
+	SMTPPass string
+	SMTPFrom string
 }
 
 func InitConfig() *AppConfig {
@@ -16,6 +21,11 @@ func InitConfig() *AppConfig {
 	}
 
 	return &AppConfig{
-		DBUrl: dbURL,
+		DBUrl:    dbURL,
+		SMTPHost: os.Getenv("SMTP_HOST"),
+		SMTPPort: os.Getenv("SMTP_PORT"),
+		SMTPUser: os.Getenv("SMTP_USER"),
+		SMTPPass: os.Getenv("SMTP_PASS"),
+		SMTPFrom: os.Getenv("SMTP_FROM"),
 	}
 }

@@ -6,16 +6,18 @@ import (
 	"strconv"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
+	"vocal_fusion/pkg/email"
 
 	"github.com/go-chi/chi/v5"
 )
 
 type MessageHandler struct {
-	Repo repository.MessageRepository
+	Repo  repository.MessageRepository
+	Email email.EmailService
 }
 
-func NewMessageHandler(repo repository.MessageRepository) *MessageHandler {
-	return &MessageHandler{Repo: repo}
+func NewMessageHandler(repo repository.MessageRepository, email email.EmailService) *MessageHandler {
+	return &MessageHandler{Repo: repo, Email: email}
 }
 
 // CreateMessage handles POST /messages
@@ -31,9 +33,48 @@ func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Handle Reply Logic
+	if msg.ReplyToID != nil {
+		parentID := *msg.ReplyToID
+
+		// 1. Check if parent message exists
+		parent, err := h.Repo.GetMessageByID(parentID)
+		if err != nil {
+			http.Error(w, "Parent message not found", http.StatusNotFound)
+			return
+		}
+
+		// 2. Enforce One-to-One Reply
+		alreadyReplied, err := h.Repo.HasReply(parentID)
+		if err != nil {
+			http.Error(w, "Error checking reply status", http.StatusInternalServerError)
+			return
+		}
+		if alreadyReplied {
+			http.Error(w, "This message has already been replied to", http.StatusBadRequest)
+			return
+		}
+
+		// 3. Send Email Notification
+		subject := "RE: " + parent.Subject
+		if err := h.Email.SendEmail(parent.Email, subject, msg.Content); err != nil {
+			// We log the error but optionally allow the message to be saved
+			// Or we can fail the request. Let's fail it for consistency if email is critical.
+			http.Error(w, "Failed to send email reply: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
 	if err := h.Repo.CreateMessage(&msg); err != nil {
 		http.Error(w, "Failed to save message", http.StatusInternalServerError)
 		return
+	}
+
+	// Update Parent Status to "replied"
+	if msg.ReplyToID != nil {
+		if err := h.Repo.UpdateMessageStatus(*msg.ReplyToID, models.MessageStatusReplied); err != nil {
+			// We don't fail here because the message is already saved and email sent,
+		}
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -68,15 +109,15 @@ func (h *MessageHandler) UpdateMessageStatus(w http.ResponseWriter, r *http.Requ
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 
 	var payload struct {
-		Status string `json:"status"`
+		Status models.MessageStatus `json:"status"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	if payload.Status == "" {
-		http.Error(w, "Status is required", http.StatusBadRequest)
+	if !payload.Status.IsValid() {
+		http.Error(w, "Invalid status. Allowed: unread, read, replied", http.StatusBadRequest)
 		return
 	}
 
