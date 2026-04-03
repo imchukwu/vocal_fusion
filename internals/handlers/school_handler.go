@@ -86,9 +86,11 @@ func (h *SchoolHandler) UpdateSchool(w http.ResponseWriter, r *http.Request) {
 	school.City = updated.City
 	school.PrincipalName = updated.PrincipalName
 	school.CoordinationName = updated.CoordinationName
-	school.PaymentStatus = updated.PaymentStatus
-	school.MediaList = updated.MediaList
+	school.ProofOfPayment = updated.ProofOfPayment
 	school.ConfirmStatus = updated.ConfirmStatus
+	school.Position = updated.Position
+	school.PhoneNumber = updated.PhoneNumber
+	school.ChoirSize = updated.ChoirSize
 
 	if err := h.Repo.UpdateSchool(school); err != nil {
 		http.Error(w, "Failed to update school", http.StatusInternalServerError)
@@ -115,15 +117,10 @@ func (h *SchoolHandler) UpdateConfirmationStatus(w http.ResponseWriter, r *http.
 	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
 
 	var payload struct {
-		Status string `json:"status"`
+		Status bool `json:"status"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	if payload.Status == "" {
-		http.Error(w, "Status is required", http.StatusBadRequest)
 		return
 	}
 

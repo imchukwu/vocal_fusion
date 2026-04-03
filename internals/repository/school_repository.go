@@ -11,7 +11,7 @@ type SchoolRepository interface {
 	GetAllSchools() ([]models.School, error)
 	GetSchoolByID(id int) (*models.School, error)
 	UpdateSchool(school *models.School) error
-	UpdateConfirmationStatus(id int, status string) error
+	UpdateConfirmationStatus(id int, status bool) error
 	DeleteSchool(id int) error
 }
 
@@ -43,8 +43,8 @@ func (r *schoolRepository) UpdateSchool(school *models.School) error {
 	return r.DB.Save(school).Error
 }
 
-func (r *schoolRepository) UpdateConfirmationStatus(id int, status string) error {
-	return r.DB.Model(&models.School{}).Where("id = ?", id).Update("confirmationStatus", status).Error
+func (r *schoolRepository) UpdateConfirmationStatus(id int, status bool) error {
+	return r.DB.Model(&models.School{}).Where("id = ?", id).Update("confirmation_status", status).Error
 }
 
 func (r *schoolRepository) DeleteSchool(id int) error {

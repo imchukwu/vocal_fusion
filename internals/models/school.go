@@ -12,12 +12,11 @@ type School struct {
     City             string    `json:"city"`
     PrincipalName    string    `json:"principalName"`
     CoordinationName string    `json:"choirCoordinator"`
-    PaymentStatus    string    `json:"paymentStatus"`
-    MediaList        string    `json:"mediaList"`
-    ConfirmStatus    string    `json:"confirmationStatus"`
+    ProofOfPayment   string    `json:"proofOfPayment"`
+    ConfirmStatus    bool      `json:"confirmationStatus"`
     Position         string    `json:"position"`
     PhoneNumber      string    `json:"phoneNumber"`
-    ChoirSize        string    `json:"choirSize"`
+    ChoirSize        int       `json:"choirSize"`
 
     // Many-to-Many Pivot Relationship
     Events []Event `json:"events" gorm:"many2many:school_events;"`
