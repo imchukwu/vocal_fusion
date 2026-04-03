@@ -33,7 +33,7 @@ func (r *messageRepository) GetAllMessages() ([]models.Message, error) {
 
 func (r *messageRepository) GetMessageByID(id int) (*models.Message, error) {
 	var msg models.Message
-	err := r.DB.Preload("School").First(&msg, id).Error
+	err := r.DB.First(&msg, id).Error
 	return &msg, err
 }
 

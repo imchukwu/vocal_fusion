@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
-
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
 
@@ -32,8 +30,6 @@ func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Sender name, email and content are required", http.StatusBadRequest)
 		return
 	}
-
-	msg.Date = time.Now()
 
 	if err := h.Repo.CreateMessage(&msg); err != nil {
 		http.Error(w, "Failed to save message", http.StatusInternalServerError)
