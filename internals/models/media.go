@@ -6,11 +6,16 @@ import "time"
 type Media struct {
     ID        int       `json:"id" gorm:"primaryKey"`
     Thumbnail string    `json:"thumbnail"` // URL or path to the thumbnail (if applicable)
+    Content   string    `json:"content"`   // URL or path to the actual media content
     Type      string    `json:"type" gorm:"not null"` // e.g., "image/jpeg", "video/mp4"
     Tag       string    `json:"tag"`      // e.g., "school_logo", "event_photo"
     Caption   string    `json:"caption"`
     Date      time.Time `json:"date" gorm:"not null"`
     
+    // Relationship to Event (Many-to-One)
+    EventID *int   `json:"event_id"`
+    Event   *Event `json:"event" gorm:"foreignKey:EventID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+
     CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
     UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }

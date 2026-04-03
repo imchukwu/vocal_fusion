@@ -23,7 +23,8 @@ func (h *SchoolEventHandler) RegisterSchool(w http.ResponseWriter, r *http.Reque
 	eventID, _ := strconv.Atoi(chi.URLParam(r, "eventID"))
 
 	var body struct {
-		SchoolID int `json:"school_id"`
+		SchoolID int    `json:"school_id"`
+		Code     string `json:"code"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -35,6 +36,7 @@ func (h *SchoolEventHandler) RegisterSchool(w http.ResponseWriter, r *http.Reque
 		SchoolID: body.SchoolID,
 		EventID:  eventID,
 		Status:   "Registered",
+		Code:     body.Code,
 	}
 
 	if err := h.Repo.RegisterSchoolForEvent(reg); err != nil {

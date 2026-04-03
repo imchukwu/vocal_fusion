@@ -14,6 +14,9 @@ type Event struct {
 	// Many-to-Many Pivot Relationship
 	Schools []School `json:"schools" gorm:"many2many:school_events;"`
 
+	// One-to-Many Relationship
+	Media []Media `json:"media" gorm:"foreignKey:EventID"`
+
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }

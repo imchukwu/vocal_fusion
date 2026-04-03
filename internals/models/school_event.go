@@ -12,6 +12,7 @@ type SchoolEvent struct {
     Event     Event     `json:"event" gorm:"foreignKey:EventID"`
 
     Status    string    `json:"status" gorm:"default:'Registered'"` 
+    Code      string    `json:"code"`
     // Optional extra fields
     Notes     string    `json:"notes"`
 

@@ -29,13 +29,13 @@ func (r *eventRepository) CreateEvent(event *models.Event) error {
 
 func (r *eventRepository) GetAllEvents() ([]models.Event, error) {
 	var events []models.Event
-	err := r.db.Find(&events).Error
+	err := r.db.Preload("Media").Find(&events).Error
 	return events, err
 }
 
 func (r *eventRepository) GetEventByID(id uint) (*models.Event, error) {
 	var event models.Event
-	err := r.db.First(&event, id).Error
+	err := r.db.Preload("Media").First(&event, id).Error
 	return &event, err
 }
 

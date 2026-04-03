@@ -27,13 +27,13 @@ func (r *mediaRepository) CreateMedia(media *models.Media) error {
 
 func (r *mediaRepository) GetAllMedia() ([]models.Media, error) {
 	var media []models.Media
-	err := r.DB.Order("created_at desc").Find(&media).Error
+	err := r.DB.Preload("Event").Order("created_at desc").Find(&media).Error
 	return media, err
 }
 
 func (r *mediaRepository) GetMediaByID(id int) (*models.Media, error) {
 	var media models.Media
-	err := r.DB.First(&media, id).Error
+	err := r.DB.Preload("Event").First(&media, id).Error
 	return &media, err
 }
 
