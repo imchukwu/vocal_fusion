@@ -28,9 +28,24 @@ func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if msg.SenderName == "" || msg.Email == "" || msg.Content == "" {
-		http.Error(w, "Sender name, email and content are required", http.StatusBadRequest)
+	if msg.Content == "" {
+		http.Error(w, "Content is required", http.StatusBadRequest)
 		return
+	}
+
+	if msg.ReplyToID == nil && (msg.SenderName == "" || msg.Email == "") {
+		http.Error(w, "Sender name and email are required for new messages", http.StatusBadRequest)
+		return
+	}
+
+	// Handle defaults for replies from Admin
+	if msg.ReplyToID != nil {
+		if msg.SenderName == "" {
+			msg.SenderName = "Vocal Fusion Admin"
+		}
+		if msg.Email == "" {
+			msg.Email = "admin@vocalfusion.com"
+		}
 	}
 
 	// Handle Reply Logic
@@ -53,6 +68,11 @@ func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 		if alreadyReplied {
 			http.Error(w, "This message has already been replied to", http.StatusBadRequest)
 			return
+		}
+
+		// Let's enforce that a reply has a subject based on parent if missed
+		if msg.Subject == "" {
+			msg.Subject = "RE: " + parent.Subject
 		}
 
 		// 3. Send Email Notification

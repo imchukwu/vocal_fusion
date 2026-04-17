@@ -9,6 +9,7 @@ type SchoolEventRepository interface {
 	RegisterSchoolForEvent(reg *models.SchoolEvent) error
 	GetRegistrationsByEvent(eventID int) ([]models.SchoolEvent, error)
 	GetRegistrationsBySchool(schoolID int) ([]models.SchoolEvent, error)
+	UpdateSchoolEventCode(eventID int, schoolID int, code string) error
 	UnregisterSchool(eventID int, schoolID int) error
 }
 
@@ -49,4 +50,10 @@ func (r *schoolEventRepository) UnregisterSchool(eventID int, schoolID int) erro
 		Where("event_id = ? AND school_id = ?", eventID, schoolID).
 		Delete(&models.SchoolEvent{}).
 		Error
+}
+
+func (r *schoolEventRepository) UpdateSchoolEventCode(eventID int, schoolID int, code string) error {
+	return r.db.Model(&models.SchoolEvent{}).
+		Where("event_id = ? AND school_id = ?", eventID, schoolID).
+		Update("code", code).Error
 }

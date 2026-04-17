@@ -44,7 +44,7 @@ func (r *schoolRepository) UpdateSchool(school *models.School) error {
 }
 
 func (r *schoolRepository) UpdateConfirmationStatus(id int, status bool) error {
-	return r.DB.Model(&models.School{}).Where("id = ?", id).Update("confirmation_status", status).Error
+	return r.DB.Model(&models.School{}).Where("id = ?", id).Update("confirm_status", status).Error
 }
 
 func (r *schoolRepository) DeleteSchool(id int) error {

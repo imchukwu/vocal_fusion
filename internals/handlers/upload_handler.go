@@ -14,13 +14,13 @@ import (
 func UploadFile(w http.ResponseWriter, r *http.Request) {
 	// Parse the multipart form, max 10 MB limit
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		http.Error(w, "Error parsing form or file too large", http.StatusBadRequest)
+		http.Error(w, "Error parsing form or file too large: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	file, handler, err := r.FormFile("file") // The frontend must use form key 'file'
 	if err != nil {
-		http.Error(w, "Error retrieving file from request. Ensure form field name is 'file'", http.StatusBadRequest)
+		http.Error(w, "Error retrieving file from request. Ensure form field name is 'file': "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()

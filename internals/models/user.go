@@ -7,6 +7,7 @@ type User struct {
 	Name       string     `json:"name" gorm:"not null"`
 	Email      string     `json:"email" gorm:"unique;not null"`
 	Phone      string     `json:"phone"`
+	Password   string     `json:"-" gorm:"not null;default:''"`
 	Role       string     `json:"role" gorm:"default:school_user"`
 	LastLogin  *time.Time `json:"last_login"`
 	Status     string     `json:"status" gorm:"default:active"`

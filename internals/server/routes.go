@@ -27,10 +27,15 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 	r.Route("/users", func(api chi.Router) {
 		api.Post("/register", userHandler.RegisterUser)
 		api.Post("/login", userHandler.Login)
-		api.Get("/", userHandler.GetAllUsers)
-		api.Get("/{id}", userHandler.GetUserByID)
-		api.Put("/{id}", userHandler.UpdateUser)
-		api.Delete("/{id}", userHandler.DeleteUser)
+		
+		// Protected
+		api.Group(func(protected chi.Router) {
+			protected.Use(middleware.JWTAuthMiddleware)
+			protected.Get("/", userHandler.GetAllUsers)
+			protected.Get("/{id}", userHandler.GetUserByID)
+			protected.Put("/{id}", userHandler.UpdateUser)
+			protected.Delete("/{id}", userHandler.DeleteUser)
+		})
 	})
 
 	// ===== Events =====
@@ -102,6 +107,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 		api.Post("/events/{eventID}", schoolEventHandler.RegisterSchool)
 		api.Get("/events/{eventID}", schoolEventHandler.GetEventRegistrations)
 		api.Get("/schools/{schoolID}", schoolEventHandler.GetSchoolRegistrations)
+		api.Put("/events/{eventID}/schools/{schoolID}/code", schoolEventHandler.UpdateSchoolEventCode)
 		api.Delete("/events/{eventID}/schools/{schoolID}", schoolEventHandler.UnregisterSchool)
 	})
 

@@ -89,3 +89,35 @@ func (h *SchoolEventHandler) UnregisterSchool(w http.ResponseWriter, r *http.Req
 		"message": "Unregistered successfully",
 	})
 }
+
+// PUT /events/{eventID}/schools/{schoolID}/code
+func (h *SchoolEventHandler) UpdateSchoolEventCode(w http.ResponseWriter, r *http.Request) {
+	eventID, err := strconv.Atoi(chi.URLParam(r, "eventID"))
+	if err != nil {
+		http.Error(w, "Invalid event ID", http.StatusBadRequest)
+		return
+	}
+	
+	schoolID, err := strconv.Atoi(chi.URLParam(r, "schoolID"))
+	if err != nil {
+		http.Error(w, "Invalid school ID", http.StatusBadRequest)
+		return
+	}
+
+	var payload struct {
+		Code string `json:"code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Repo.UpdateSchoolEventCode(eventID, schoolID, payload.Code); err != nil {
+		http.Error(w, "Failed to update code", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "School event code updated successfully",
+	})
+}
