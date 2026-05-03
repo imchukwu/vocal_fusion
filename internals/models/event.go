@@ -10,6 +10,7 @@ type Event struct {
 	Date        time.Time `json:"date" gorm:"not null"`
 	Time        string    `json:"time"`
 	Location    string    `json:"location"`
+	CodePrefix  string    `json:"code_prefix"` // e.g. VFMF-SME, CHC-SCC
 
 	// Many-to-Many Pivot Relationship
 	Schools []School `json:"schools" gorm:"many2many:school_events;"`

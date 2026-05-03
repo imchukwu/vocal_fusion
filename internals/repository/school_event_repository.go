@@ -13,6 +13,7 @@ type SchoolEventRepository interface {
 	UpdateSchoolEventCode(eventID int, schoolID int, code string) error
 	UpdateRegistrationStatus(eventID int, schoolID int, status string) error
 	UnregisterSchool(eventID int, schoolID int) error
+	CountIssuedCodes(eventID int) (int64, error)
 }
 
 type schoolEventRepository struct {
@@ -74,4 +75,12 @@ func (r *schoolEventRepository) UpdateRegistrationStatus(eventID int, schoolID i
 	return r.db.Model(&models.SchoolEvent{}).
 		Where("event_id = ? AND school_id = ?", eventID, schoolID).
 		Update("status", status).Error
+}
+
+func (r *schoolEventRepository) CountIssuedCodes(eventID int) (int64, error) {
+	var count int64
+	err := r.db.Model(&models.SchoolEvent{}).
+		Where("event_id = ? AND code != ?", eventID, "").
+		Count(&count).Error
+	return count, err
 }

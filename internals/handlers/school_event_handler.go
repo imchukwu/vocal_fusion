@@ -137,7 +137,19 @@ func (h *SchoolEventHandler) GenerateSchoolEventCode(w http.ResponseWriter, r *h
 		return
 	}
 
-	code := utils.GenerateEventCode()
+	// Determine sequence number
+	count, err := h.Repo.CountIssuedCodes(eventID)
+	if err != nil {
+		http.Error(w, "Failed to determine sequence number", http.StatusInternalServerError)
+		return
+	}
+
+	prefix := reg.Event.CodePrefix
+	if prefix == "" {
+		prefix = "VF" // Default fallback
+	}
+
+	code := utils.GenerateEventCode(prefix, int(count)+1)
 	if err := h.Repo.UpdateSchoolEventCode(eventID, schoolID, code); err != nil {
 		http.Error(w, "Failed to generate code", http.StatusInternalServerError)
 		return
