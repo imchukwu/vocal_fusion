@@ -20,6 +20,7 @@ type School struct {
 
     // Many-to-Many Pivot Relationship
     Events []Event `json:"events" gorm:"many2many:school_events;"`
+    Registrations []SchoolEvent `json:"registrations" gorm:"foreignKey:SchoolID"`
 
     CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
     UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`

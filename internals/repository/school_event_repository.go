@@ -14,6 +14,7 @@ type SchoolEventRepository interface {
 	UpdateRegistrationStatus(eventID int, schoolID int, status string) error
 	UnregisterSchool(eventID int, schoolID int) error
 	CountIssuedCodes(eventID int) (int64, error)
+	GetAllRegistrations() ([]models.SchoolEvent, error)
 }
 
 type schoolEventRepository struct {
@@ -83,4 +84,14 @@ func (r *schoolEventRepository) CountIssuedCodes(eventID int) (int64, error) {
 		Where("event_id = ? AND code != ?", eventID, "").
 		Count(&count).Error
 	return count, err
+}
+
+func (r *schoolEventRepository) GetAllRegistrations() ([]models.SchoolEvent, error) {
+	var regs []models.SchoolEvent
+	err := r.db.
+		Preload("School").
+		Preload("Event").
+		Order("created_at desc").
+		Find(&regs).Error
+	return regs, err
 }

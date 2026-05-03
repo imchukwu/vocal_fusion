@@ -105,6 +105,8 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 	schoolEventHandler := handlers.NewSchoolEventHandler(schoolEventRepo)
 
 	r.Route("/registrations", func(api chi.Router) {
+		api.Get("/", schoolEventHandler.GetAllRegistrations)
+		api.Get("/events", schoolEventHandler.GetAllRegistrations)
 		api.Post("/events/{eventID}", schoolEventHandler.RegisterSchool)
 		api.Get("/events/{eventID}", schoolEventHandler.GetEventRegistrations)
 		api.Get("/schools/{schoolID}", schoolEventHandler.GetSchoolRegistrations)

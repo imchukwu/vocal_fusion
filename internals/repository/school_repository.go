@@ -29,13 +29,20 @@ func (r *schoolRepository) CreateSchool(school *models.School) error {
 
 func (r *schoolRepository) GetAllSchools() ([]models.School, error) {
 	var schools []models.School
-	err := r.DB.Order("created_at desc").Find(&schools).Error
+	err := r.DB.
+		Preload("Registrations").
+		Preload("Registrations.Event").
+		Order("created_at desc").
+		Find(&schools).Error
 	return schools, err
 }
 
 func (r *schoolRepository) GetSchoolByID(id int) (*models.School, error) {
 	var school models.School
-	err := r.DB.First(&school, id).Error
+	err := r.DB.
+		Preload("Registrations").
+		Preload("Registrations.Event").
+		First(&school, id).Error
 	return &school, err
 }
 

@@ -88,6 +88,17 @@ func (h *SchoolEventHandler) GetEventRegistrations(w http.ResponseWriter, r *htt
 	json.NewEncoder(w).Encode(regs)
 }
 
+// GET /registrations
+func (h *SchoolEventHandler) GetAllRegistrations(w http.ResponseWriter, r *http.Request) {
+	regs, err := h.Repo.GetAllRegistrations()
+	if err != nil {
+		http.Error(w, "Failed to fetch registrations", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(regs)
+}
+
 // GET /schools/{schoolID}/registrations
 func (h *SchoolEventHandler) GetSchoolRegistrations(w http.ResponseWriter, r *http.Request) {
 	schoolID, _ := strconv.Atoi(chi.URLParam(r, "schoolID"))
