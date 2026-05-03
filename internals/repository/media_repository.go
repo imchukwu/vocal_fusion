@@ -8,6 +8,7 @@ import (
 type MediaRepository interface {
 	CreateMedia(media *models.Media) error
 	GetAllMedia() ([]models.Media, error)
+	GetMediaByFilter(tag string, mediaType string, eventID int) ([]models.Media, error)
 	GetMediaByID(id int) (*models.Media, error)
 	UpdateMedia(media *models.Media) error
 	DeleteMedia(id int) error
@@ -28,6 +29,24 @@ func (r *mediaRepository) CreateMedia(media *models.Media) error {
 func (r *mediaRepository) GetAllMedia() ([]models.Media, error) {
 	var media []models.Media
 	err := r.DB.Preload("Event").Order("created_at desc").Find(&media).Error
+	return media, err
+}
+
+func (r *mediaRepository) GetMediaByFilter(tag string, mediaType string, eventID int) ([]models.Media, error) {
+	var media []models.Media
+	query := r.DB.Preload("Event")
+
+	if tag != "" {
+		query = query.Where("tag = ?", tag)
+	}
+	if mediaType != "" {
+		query = query.Where("type LIKE ?", "%"+mediaType+"%")
+	}
+	if eventID > 0 {
+		query = query.Where("event_id = ?", eventID)
+	}
+
+	err := query.Order("created_at desc").Find(&media).Error
 	return media, err
 }
 

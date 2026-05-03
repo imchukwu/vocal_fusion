@@ -81,6 +81,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 
 	r.Route("/messages", func(api chi.Router) {
 		api.Post("/", messageHandler.CreateMessage)
+		api.Post("/bulk", messageHandler.SendBulkMessage)
 		api.Get("/", messageHandler.GetAllMessages)
 		api.Get("/{id}", messageHandler.GetMessageByID)
 		api.Patch("/{id}/status", messageHandler.UpdateMessageStatus)
@@ -107,6 +108,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 		api.Post("/events/{eventID}", schoolEventHandler.RegisterSchool)
 		api.Get("/events/{eventID}", schoolEventHandler.GetEventRegistrations)
 		api.Get("/schools/{schoolID}", schoolEventHandler.GetSchoolRegistrations)
+		api.Patch("/events/{eventID}/schools/{schoolID}/verify", schoolEventHandler.VerifyRegistration)
 		api.Put("/events/{eventID}/schools/{schoolID}/code", schoolEventHandler.UpdateSchoolEventCode)
 		api.Delete("/events/{eventID}/schools/{schoolID}", schoolEventHandler.UnregisterSchool)
 	})
@@ -120,6 +122,15 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 		r.Get("/", winnerHandler.GetAllWinnerSays)
 		r.Get("/{id}", winnerHandler.GetWinnerSaysByID)
 		r.Delete("/{id}", winnerHandler.DeleteWinnerSays)
+	})
+
+	// Settings routes
+	settingsRepo := repository.NewSettingsRepository(db)
+	settingsHandler := handlers.NewSettingsHandler(settingsRepo)
+
+	r.Route("/settings", func(r chi.Router) {
+		r.Get("/", settingsHandler.GetSettings)
+		r.Put("/", settingsHandler.UpdateSettings)
 	})
 
 	// ===== File Uploads =====

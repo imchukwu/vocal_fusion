@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"vocal_fusion/internals/models"
@@ -101,6 +102,57 @@ func (h *MessageHandler) CreateMessage(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Message sent successfully",
 	})
+}
+
+// SendBulkMessage handles POST /messages/bulk
+func (h *MessageHandler) SendBulkMessage(w http.ResponseWriter, r *http.Request) {
+	var payload struct {
+		Emails  []string `json:"emails"`
+		Subject string   `json:"subject"`
+		Content string   `json:"content"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if len(payload.Emails) == 0 {
+		http.Error(w, "No recipients provided", http.StatusBadRequest)
+		return
+	}
+
+	if payload.Subject == "" || payload.Content == "" {
+		http.Error(w, "Subject and content are required", http.StatusBadRequest)
+		return
+	}
+
+	var errors []string
+	for _, email := range payload.Emails {
+		if err := h.Email.SendEmail(email, payload.Subject, payload.Content); err != nil {
+			errors = append(errors, fmt.Sprintf("Failed to send to %s: %v", email, err))
+		} else {
+			// Save the message for record
+			msg := &models.Message{
+				Email:      email,
+				Subject:    payload.Subject,
+				Content:    payload.Content,
+				SenderName: "Vocal Fusion Admin",
+				Status:     models.MessageStatusRead, // Bulk messages are usually "outbound"
+			}
+			_ = h.Repo.CreateMessage(msg)
+		}
+	}
+
+	response := map[string]interface{}{
+		"message": "Bulk messaging completed",
+	}
+	if len(errors) > 0 {
+		response["errors"] = errors
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 // GetAllMessages handles GET /messages

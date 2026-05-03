@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"vocal_fusion/internals/models"
 	"vocal_fusion/internals/repository"
+	"vocal_fusion/pkg/utils"
 )
 
 type SchoolEventHandler struct {
@@ -18,13 +19,12 @@ func NewSchoolEventHandler(repo repository.SchoolEventRepository) *SchoolEventHa
 	return &SchoolEventHandler{Repo: repo}
 }
 
-// POST /events/{eventID}/register
+// POST /registrations/events/{eventID}
 func (h *SchoolEventHandler) RegisterSchool(w http.ResponseWriter, r *http.Request) {
 	eventID, _ := strconv.Atoi(chi.URLParam(r, "eventID"))
 
 	var body struct {
-		SchoolID int    `json:"school_id"`
-		Code     string `json:"code"`
+		SchoolID int `json:"school_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -35,17 +35,52 @@ func (h *SchoolEventHandler) RegisterSchool(w http.ResponseWriter, r *http.Reque
 	reg := &models.SchoolEvent{
 		SchoolID: body.SchoolID,
 		EventID:  eventID,
-		Status:   "Registered",
-		Code:     body.Code,
+		Status:   models.StatusRegistered,
+		Code:     "", // Code will be generated upon verification
 	}
 
 	if err := h.Repo.RegisterSchoolForEvent(reg); err != nil {
-		http.Error(w, "Failed to register school", http.StatusInternalServerError)
+		http.Error(w, "Failed to register school: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "School registered successfully",
+	})
+}
+
+// PATCH /registrations/events/{eventID}/schools/{schoolID}/verify
+func (h *SchoolEventHandler) VerifyRegistration(w http.ResponseWriter, r *http.Request) {
+	eventID, _ := strconv.Atoi(chi.URLParam(r, "eventID"))
+	schoolID, _ := strconv.Atoi(chi.URLParam(r, "schoolID"))
+
+	reg, err := h.Repo.GetRegistration(eventID, schoolID)
+	if err != nil {
+		http.Error(w, "Registration not found", http.StatusNotFound)
+		return
+	}
+
+	if reg.Status == models.StatusVerified {
+		http.Error(w, "Registration is already verified", http.StatusBadRequest)
+		return
+	}
+
+	// Generate Code
+	code := utils.GenerateEventCode()
+
+	if err := h.Repo.UpdateRegistrationStatus(eventID, schoolID, models.StatusVerified); err != nil {
+		http.Error(w, "Failed to update status", http.StatusInternalServerError)
+		return
+	}
+
+	if err := h.Repo.UpdateSchoolEventCode(eventID, schoolID, code); err != nil {
+		http.Error(w, "Failed to generate code", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Registration verified successfully",
+		"code":    code,
 	})
 }
 

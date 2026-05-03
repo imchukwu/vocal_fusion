@@ -9,7 +9,9 @@ type SchoolEventRepository interface {
 	RegisterSchoolForEvent(reg *models.SchoolEvent) error
 	GetRegistrationsByEvent(eventID int) ([]models.SchoolEvent, error)
 	GetRegistrationsBySchool(schoolID int) ([]models.SchoolEvent, error)
+	GetRegistration(eventID int, schoolID int) (*models.SchoolEvent, error)
 	UpdateSchoolEventCode(eventID int, schoolID int, code string) error
+	UpdateRegistrationStatus(eventID int, schoolID int, status string) error
 	UnregisterSchool(eventID int, schoolID int) error
 }
 
@@ -52,8 +54,24 @@ func (r *schoolEventRepository) UnregisterSchool(eventID int, schoolID int) erro
 		Error
 }
 
+func (r *schoolEventRepository) GetRegistration(eventID int, schoolID int) (*models.SchoolEvent, error) {
+	var reg models.SchoolEvent
+	err := r.db.
+		Preload("School").
+		Preload("Event").
+		Where("event_id = ? AND school_id = ?", eventID, schoolID).
+		First(&reg).Error
+	return &reg, err
+}
+
 func (r *schoolEventRepository) UpdateSchoolEventCode(eventID int, schoolID int, code string) error {
 	return r.db.Model(&models.SchoolEvent{}).
 		Where("event_id = ? AND school_id = ?", eventID, schoolID).
 		Update("code", code).Error
+}
+
+func (r *schoolEventRepository) UpdateRegistrationStatus(eventID int, schoolID int, status string) error {
+	return r.db.Model(&models.SchoolEvent{}).
+		Where("event_id = ? AND school_id = ?", eventID, schoolID).
+		Update("status", status).Error
 }

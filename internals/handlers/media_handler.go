@@ -49,7 +49,19 @@ func (h *MediaHandler) CreateMedia(w http.ResponseWriter, r *http.Request) {
 
 // GetAllMedia handles GET /media
 func (h *MediaHandler) GetAllMedia(w http.ResponseWriter, r *http.Request) {
-	mediaList, err := h.Repo.GetAllMedia()
+	tag := r.URL.Query().Get("tag")
+	mediaType := r.URL.Query().Get("type")
+	eventID, _ := strconv.Atoi(r.URL.Query().Get("event_id"))
+
+	var mediaList []models.Media
+	var err error
+
+	if tag != "" || mediaType != "" || eventID > 0 {
+		mediaList, err = h.Repo.GetMediaByFilter(tag, mediaType, eventID)
+	} else {
+		mediaList, err = h.Repo.GetAllMedia()
+	}
+
 	if err != nil {
 		http.Error(w, "Failed to fetch media", http.StatusInternalServerError)
 		return

@@ -2,6 +2,12 @@ package models
 
 import "time"
 
+const (
+    StatusRegistered = "Registered"
+    StatusVerified   = "Verified"
+    StatusPending    = "Pending"
+)
+
 type SchoolEvent struct {
     ID        int       `json:"id" gorm:"primaryKey"`
 
@@ -12,7 +18,7 @@ type SchoolEvent struct {
     Event     Event     `json:"event" gorm:"foreignKey:EventID"`
 
     Status    string    `json:"status" gorm:"default:'Registered'"` 
-    Code      string    `json:"code"`
+    Code      string    `json:"code" gorm:"unique"`
     // Optional extra fields
     Notes     string    `json:"notes"`
 
