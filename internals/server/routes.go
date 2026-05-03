@@ -109,6 +109,7 @@ func RegisterRoutes(r *chi.Mux, db *gorm.DB, emailSvc email.EmailService) {
 		api.Get("/events/{eventID}", schoolEventHandler.GetEventRegistrations)
 		api.Get("/schools/{schoolID}", schoolEventHandler.GetSchoolRegistrations)
 		api.Patch("/events/{eventID}/schools/{schoolID}/verify", schoolEventHandler.VerifyRegistration)
+		api.Put("/events/{eventID}/schools/{schoolID}/generate-code", schoolEventHandler.GenerateSchoolEventCode)
 		api.Put("/events/{eventID}/schools/{schoolID}/code", schoolEventHandler.UpdateSchoolEventCode)
 		api.Delete("/events/{eventID}/schools/{schoolID}", schoolEventHandler.UnregisterSchool)
 	})

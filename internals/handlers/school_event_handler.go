@@ -65,22 +65,13 @@ func (h *SchoolEventHandler) VerifyRegistration(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Generate Code
-	code := utils.GenerateEventCode()
-
 	if err := h.Repo.UpdateRegistrationStatus(eventID, schoolID, models.StatusVerified); err != nil {
 		http.Error(w, "Failed to update status", http.StatusInternalServerError)
 		return
 	}
 
-	if err := h.Repo.UpdateSchoolEventCode(eventID, schoolID, code); err != nil {
-		http.Error(w, "Failed to generate code", http.StatusInternalServerError)
-		return
-	}
-
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Registration verified successfully",
-		"code":    code,
 	})
 }
 
@@ -122,6 +113,39 @@ func (h *SchoolEventHandler) UnregisterSchool(w http.ResponseWriter, r *http.Req
 
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Unregistered successfully",
+	})
+}
+
+// PUT /registrations/events/{eventID}/schools/{schoolID}/generate-code
+func (h *SchoolEventHandler) GenerateSchoolEventCode(w http.ResponseWriter, r *http.Request) {
+	eventID, _ := strconv.Atoi(chi.URLParam(r, "eventID"))
+	schoolID, _ := strconv.Atoi(chi.URLParam(r, "schoolID"))
+
+	reg, err := h.Repo.GetRegistration(eventID, schoolID)
+	if err != nil {
+		http.Error(w, "Registration not found", http.StatusNotFound)
+		return
+	}
+
+	if reg.Status != models.StatusVerified {
+		http.Error(w, "Registration must be verified before generating a code", http.StatusBadRequest)
+		return
+	}
+
+	if reg.Code != "" {
+		http.Error(w, "Code already generated for this registration", http.StatusBadRequest)
+		return
+	}
+
+	code := utils.GenerateEventCode()
+	if err := h.Repo.UpdateSchoolEventCode(eventID, schoolID, code); err != nil {
+		http.Error(w, "Failed to generate code", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Code generated successfully",
+		"code":    code,
 	})
 }
 
